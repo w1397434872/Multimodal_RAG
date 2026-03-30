@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多模态RAG系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <span>多模态RAG</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>功能菜单</h3>
+                    <ul>
+                        <li class="active" data-tab="chat">
+                            <i class="fas fa-comments"></i>
+                            <span>智能问答</span>
+                        </li>
+                        <li data-tab="index">
+                            <i class="fas fa-database"></i>
+                            <span>索引管理</span>
+                        </li>
+                        <li data-tab="compare">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>方案对比</span>
+                        </li>
+                        <li data-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>系统设置</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>RAG方案</h3>
+                    <ul class="method-list">
+                        <li class="method-item" data-method="multimodal_vector">
+                            <div class="method-icon blue">
+                                <i class="fas fa-vector-square"></i>
+                            </div>
+                            <div class="method-info">
+                                <span class="method-name">多模态向量</span>
+                                <span class="method-desc">基于向量模型</span>
+                            </div>
+                        </li>
+                        <li class="method-item" data-method="multimodal_llm">
+                            <div class="method-icon purple">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="method-info">
+                                <span class="method-name">多模态大模型</span>
+                                <span class="method-desc">摘要索引方案</span>
+                            </div>
+                        </li>
+                        <li class="method-item active" data-method="balanced">
+                            <div class="method-icon green">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="method-info">
+                                <span class="method-name">平衡方案</span>
+                                <span class="method-desc">推荐</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">服务正常</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-bar">
+                <div class="breadcrumb">
+                    <span class="current-page">智能问答</span>
+                </div>
+                <div class="top-actions">
+                    <button class="btn-icon" title="刷新">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn-icon" title="帮助">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 聊天页面 -->
+            <div class="content-area active" id="chat-tab">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="welcome-message">
+                            <div class="welcome-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h2>欢迎使用多模态RAG系统</h2>
+                            <p>我可以帮您分析和理解PDF文档中的文本、表格和图片内容。</p>
+                            <div class="quick-actions">
+                                <button class="quick-btn" onclick="sendQuickMessage('介绍一下文档的主要内容')">
+                                    <i class="fas fa-file-alt"></i>
+                                    文档概述
+                                </button>
+                                <button class="quick-btn" onclick="sendQuickMessage('文档中有哪些重要图表')">
+                                    <i class="fas fa-chart-pie"></i>
+                                    查找图表
+                                </button>
+                                <button class="quick-btn" onclick="sendQuickMessage('总结一下关键结论')">
+                                    <i class="fas fa-lightbulb"></i>
+                                    关键结论
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <div class="input-wrapper">
+                            <textarea 
+                                id="messageInput" 
+                                placeholder="输入您的问题..."
+                                rows="1"
+                            ></textarea>
+                            <div class="input-actions">
+                                <button class="btn-send" id="sendBtn" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-footer">
+                            <span class="current-method">
+                                <i class="fas fa-balance-scale"></i>
+                                当前方案: 平衡方案
+                            </span>
+                            <span class="shortcut-hint">按 Enter 发送，Shift + Enter 换行</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 索引管理页面 -->
+            <div class="content-area" id="index-tab">
+                <div class="page-header">
+                    <h2>索引管理</h2>
+                    <p>构建和管理文档索引，支持三种RAG方案</p>
+                </div>
+                
+                <!-- PDF文件上传区域 -->
+                <div class="upload-section" style="background: var(--bg-card); border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 2px dashed var(--border-color);">
+                    <div class="upload-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <div class="upload-icon" style="width: 48px; height: 48px; background: var(--primary-color); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-file-pdf" style="font-size: 24px; color: white;"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.1rem;">选择PDF文档</h3>
+                            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.9rem;">上传要索引的PDF文件</p>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-input-group" style="display: flex; gap: 12px; align-items: center;">
+                        <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;" onchange="handleFileSelect(event)">
+                        <button class="btn btn-secondary" onclick="document.getElementById('pdfFileInput').click()" style="flex-shrink: 0;">
+                            <i class="fas fa-folder-open"></i>
+                            选择文件
+                        </button>
+                        <div id="selectedFileName" style="flex: 1; padding: 10px 16px; background: var(--bg-primary); border-radius: 8px; color: var(--text-secondary); font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            未选择文件
+                        </div>
+                    </div>
+                    
+                    <div id="uploadProgress" style="display: none; margin-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">上传进度</span>
+                            <span id="uploadPercent" style="font-size: 0.85rem; color: var(--primary-color);">0%</span>
+                        </div>
+                        <div style="height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden;">
+                            <div id="uploadProgressBar" style="height: 100%; width: 0%; background: var(--primary-color); transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="currentPdfInfo" style="margin-top: 16px; padding: 12px 16px; background: var(--bg-primary); border-radius: 8px; display: none;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--success-color);">
+                            <i class="fas fa-check-circle"></i>
+                            <span style="font-weight: 500;">当前PDF:</span>
+                            <span id="currentPdfName" style="color: var(--text-primary);"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="index-grid">
+                    <div class="index-card">
+                        <div class="card-header">
+                            <div class="card-icon blue">
+                                <i class="fas fa-vector-square"></i>
+                            </div>
+                            <div class="card-title">
+                                <h3>多模态向量模型</h3>
+                                <span class="badge">方案一</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-desc">使用多模态向量模型同时处理文本和图片，适合图片能单独理解的场景</p>
+                            <div class="card-stats" id="stats-vector">
+                                <div class="stat-item">
+                                    <span class="stat-value">-</span>
+                                    <span class="stat-label">文本数量</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">-</span>
+                                    <span class="stat-label">图片数量</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="buildIndex('multimodal_vector')">
+                                <i class="fas fa-hammer"></i>
+                                构建索引
+                            </button>
+                            <button class="btn btn-danger" onclick="clearIndex('multimodal_vector')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="index-card">
+                        <div class="card-header">
+                            <div class="card-icon purple">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="card-title">
+                                <h3>多模态大模型</h3>
+                                <span class="badge">方案二</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-desc">使用多模态大模型生成图片摘要，检索效果更精准，成本较高</p>
+                            <div class="card-stats" id="stats-llm">
+                                <div class="stat-item">
+                                    <span class="stat-value">-</span>
+                                    <span class="stat-label">文本数量</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">-</span>
+                                    <span class="stat-label">图片数量</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="buildIndex('multimodal_llm')">
+                                <i class="fas fa-hammer"></i>
+                                构建索引
+                            </button>
+                            <button class="btn btn-danger" onclick="clearIndex('multimodal_llm')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="index-card">
+                        <div class="card-header">
+                            <div class="card-icon green">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="card-title">
+                                <h3>平衡方案</h3>
+                                <span class="badge recommended">推荐</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-desc">图片摘要融入文档上下文，使用文本大模型回答，平衡成本和效果</p>
+                            <div class="card-stats" id="stats-balanced">
+                                <div class="stat-item">
+                                    <span class="stat-value">-</span>
+                                    <span class="stat-label">文档数量</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">-</span>
+                                    <span class="stat-label">图片数量</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="buildIndex('balanced')">
+                                <i class="fas fa-hammer"></i>
+                                构建索引
+                            </button>
+                            <button class="btn btn-danger" onclick="clearIndex('balanced')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="batch-actions">
+                    <button class="btn btn-secondary" onclick="buildAllIndices()">
+                        <i class="fas fa-layer-group"></i>
+                        构建全部索引
+                    </button>
+                    <button class="btn btn-outline" onclick="clearAllIndices()">
+                        <i class="fas fa-broom"></i>
+                        清空全部索引
+                    </button>
+                </div>
+            </div>
+
+            <!-- 方案对比页面 -->
+            <div class="content-area" id="compare-tab">
+                <div class="page-header">
+                    <h2>方案对比</h2>
+                    <p>同时查询三种RAG方案，对比不同方法的效果</p>
+                </div>
+                
+                <div class="compare-input-area">
+                    <div class="input-group">
+                        <input type="text" id="compareQuery" placeholder="输入对比查询问题...">
+                        <button class="btn btn-primary" onclick="compareMethods()">
+                            <i class="fas fa-search"></i>
+                            开始对比
+                        </button>
+                    </div>
+                </div>
+
+                <div class="compare-results" id="compareResults">
+                    <div class="compare-placeholder">
+                        <i class="fas fa-balance-scale"></i>
+                        <p>输入问题并点击"开始对比"查看三种方案的结果差异</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设置页面 -->
+            <div class="content-area" id="settings-tab">
+                <div class="page-header">
+                    <h2>系统设置</h2>
+                    <p>配置API接口和系统参数</p>
+                </div>
+                
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label>API基础地址</label>
+                        <input type="text" id="apiBaseUrl" value="http://localhost:8000" placeholder="http://localhost:8000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>默认检索数量 (top_k)</label>
+                        <input type="number" id="defaultTopK" value="5" min="1" max="20">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>默认RAG方案</label>
+                        <select id="defaultMethod">
+                            <option value="balanced" selected>平衡方案（推荐）</option>
+                            <option value="multimodal_vector">多模态向量模型</option>
+                            <option value="multimodal_llm">多模态大模型</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="saveSettings()">
+                            <i class="fas fa-save"></i>
+                            保存设置
+                        </button>
+                        <button class="btn btn-secondary" onclick="testConnection()">
+                            <i class="fas fa-plug"></i>
+                            测试连接
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loadingText">正在处理...</p>
+        </div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/app.js?v=2"></script>
+</body>
+</html>
